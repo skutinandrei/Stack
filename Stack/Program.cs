@@ -51,10 +51,11 @@
         {
             get
             {
-                if (topElement == null)
+                if (topElement is null)
                 {
                     return null;
-                } else
+                }
+                else
                 {
                     return topElement.Element;
                 }
@@ -69,7 +70,7 @@
 
         public string Pop()
         {
-            if (topElement == null)
+            if (topElement is null)
             {
                 throw new Exception("Стек пустой");
             }
@@ -104,7 +105,7 @@
                 this.element = element;
                 this.previousElement = previousElement;
             }
-            
+
             public string Element
             {
                 get { return this.element; }
