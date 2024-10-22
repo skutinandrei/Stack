@@ -17,77 +17,113 @@
             s.Pop();
             s.Pop();
             // size = 0, Top = null
-            try
+            Console.WriteLine($"size = {s.Size}, Top = {(s.Top == null ? "null" : s.Top)}");
+
+            s = new Stack("a", "b", "c");
+            s.Merge(new Stack("1", "2", "3"));
+            // в стеке s теперь элементы - "a", "b", "c", "3", "2", "1" <- верхний
+            Console.WriteLine($"size = {s.Size}, Top = '{s.Top}'");
+
+            var s2 = Stack.Concat(new Stack("a", "b", "c"), new Stack("1", "2", "3"), new Stack("А", "Б", "В"));
+            // в стеке s теперь элементы - "c", "b", "a" "3", "2", "1", "В", "Б", "А" <- верхний
+            Console.WriteLine($"size = {s2.Size}, Top = '{s2.Top}'");
+        }
+    }
+
+    public class Stack
+    {
+        public Stack(params string[] elements)
+        {
+            foreach (var element in elements)
             {
-                s.Pop();
-            }
-            catch
-            {
-                Console.WriteLine($"size = {s.Size}, Top = {(s.Top == null ? "null" : s.Top)}");
+                Add(element);
             }
         }
 
-        public class Stack
+        private StackItem? topElement;
+
+        private int size;
+        public int Size
         {
-            public Stack(params string[] elements)
+            get { return size; }
+        }
+        public string? Top
+        {
+            get
             {
-                this.elements = new List<string>(elements.Length);
-                foreach (var element in elements)
+                if (topElement == null)
                 {
-                    this.elements.Add(element);
-                    this.Size++;
-                }
-                this.Top = this.elements[^1];
-            }
-
-            public List<string> elements;
-            public int Size;
-            public string? Top;
-
-
-            public void Add(string element)
-            {
-                this.elements.Add((element));
-                this.Top = this.elements[^1];
-                this.Size++;
-            }
-
-            public string? Pop()
-            {
-                if (Size == 0)
+                    return null;
+                } else
                 {
-                    throw new Exception("Стек пустой");
-                }
-                else
-                {
-                    this.elements.RemoveAt(this.Size - 1);
-                    this.Size--;
-                    if (Size == 0)
-                    {
-                        this.Top = null;
-                    }
-                    else
-                    {
-                        this.Top = this.elements[^1];
-                    }
-
-                    return this.Top;
+                    return topElement.Element;
                 }
             }
+        }
 
-            class StackItem
+        public void Add(string element)
+        {
+            topElement = new StackItem(element, topElement);
+            size++;
+        }
+
+        public string Pop()
+        {
+            if (topElement == null)
             {
-                private string? top;
-                public int? PreviousIndex;
+                throw new Exception("Стек пустой");
+            }
+            else
+            {
+                var popElement = topElement.Element;
+                topElement = topElement.PreviousElement;
+                size--;
 
-                public string? Top
-                {
-                    get { return this.top; }
+                return popElement;
+            }
+        }
 
-                    set { this.top = value; }
-                }
+        public static Stack Concat(params Stack[] stacks)
+        {
+            var s = new Stack();
+            foreach (var stack in stacks)
+            {
+                s.Merge(stack);
+            }
 
+            return s;
+        }
 
+        class StackItem
+        {
+            private string element;
+            private StackItem? previousElement;
+
+            public StackItem(string element, StackItem? previousElement)
+            {
+                this.element = element;
+                this.previousElement = previousElement;
+            }
+            
+            public string Element
+            {
+                get { return this.element; }
+            }
+            public StackItem? PreviousElement
+            {
+                get { return this.previousElement; }
+            }
+        }
+    }
+
+    public static class StackExtension
+    {
+        public static void Merge(this Stack s1, Stack s2)
+        {
+            int stackSize = s2.Size;
+            for (int i = 0; i < stackSize; i++)
+            {
+                s1.Add(s2.Pop());
             }
         }
     }
